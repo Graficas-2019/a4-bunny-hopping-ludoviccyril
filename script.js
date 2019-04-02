@@ -3,7 +3,6 @@ function setup(canvas) {
   let renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setSize(canvas.width, canvas.height);
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   // set up camera
   let camera = new THREE.PerspectiveCamera(

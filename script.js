@@ -1,4 +1,4 @@
-async function setup(canvas) {
+function setup(canvas) {
   // setup renderer
   let renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setSize(canvas.width, canvas.height);
@@ -12,7 +12,7 @@ async function setup(canvas) {
     1,
     4000
   );
-  camera.position.set(0, 10, -5);
+  camera.position.set(0, 50, -120);
 
   // set up orbit controls
   let controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -23,7 +23,7 @@ async function setup(canvas) {
 
   // set up lights
   let mainLight = new THREE.PointLight(0xffffff, 1, 0, 5);
-  mainLight.position.set(0, 30, 0);
+  mainLight.position.set(0, 50, 0);
   mainLight.castShadow = true;
   scene.add(mainLight);
 
@@ -195,8 +195,10 @@ function run(elements) {
   elements.controls.update();
 }
 
-$(document).ready(async () => {
+$(document).ready(() => {
   let canvas = document.getElementById('bunny');
-  let elements = await setup(canvas);
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  let elements = setup(canvas);
   run(elements);
 });

@@ -22,7 +22,7 @@ async function setup(canvas) {
   scene.add(camera);
 
   // set up lights
-  let mainLight = new THREE.PointLight(0xffffff, 0.3, 0, 5);
+  let mainLight = new THREE.PointLight(0xffffff, 1, 0, 5);
   mainLight.position.set(0, 30, 0);
   mainLight.castShadow = true;
   scene.add(mainLight);
@@ -46,50 +46,81 @@ async function setup(canvas) {
   scene.add(plane);
 
   // get bunny path
-  let path = generatePath();
-  let rotation = generateRotation(path);
+  let bunnyPath = generateBunnyPath();
+  let bunnyRotation = generateRotation(bunnyPath);
 
   // set up bunny
-  new THREE.OBJLoader().load(
-    './Stanford_Bunny_OBJ-JPG/20180310_KickAir8P_UVUnwrapped_Stanford_Bunny.obj',
-    obj => {
-      var texture = new THREE.TextureLoader().load(
-        './Stanford_Bunny_OBJ-JPG/bunnystanford_res1_UVmapping3072_g005c.jpg'
-      );
-      obj.traverse(function(child) {
-        if (child instanceof THREE.Mesh) {
-          child.material.map = texture;
-          child.castShadow = true;
-        }
-      });
-      obj.scale.set(2, 2, 2);
-      obj.position.set(0, 0, 0);
-      scene.add(obj);
+  new THREE.OBJLoader().load('./assets/bunny.obj', bunny => {
+    let texture = new THREE.TextureLoader().load('./assets/bunny.jpg');
+    bunny.traverse(function(child) {
+      if (child instanceof THREE.Mesh) {
+        child.material.map = texture;
+        child.castShadow = true;
+      }
+    });
+    bunny.scale.set(32, 32, 32);
+    bunny.position.set(0, 0, 0);
+    scene.add(bunny);
 
-      let bunnyAnimator = new KF.KeyFrameAnimator();
-      bunnyAnimator.init({
-        interps: [
-          {
-            ...path,
-            target: obj.position
-          },
-          {
-            ...rotation,
-            target: obj.rotation
-          }
-        ],
-        loop: true,
-        duration: 10000
-      });
-      bunnyAnimator.start();
-    }
-  );
+    let bunnyAnimator = new KF.KeyFrameAnimator();
+    bunnyAnimator.init({
+      interps: [
+        {
+          ...bunnyPath,
+          target: bunny.position
+        },
+        {
+          ...bunnyRotation,
+          target: bunny.rotation
+        }
+      ],
+      loop: true,
+      duration: 10000
+    });
+    bunnyAnimator.start();
+  });
+
+  // get bunny path
+  let tortoisePath = generateTortoisePath();
+  let tortoiseRotation = generateRotation(tortoisePath);
+
+  // set up tortoise
+  new THREE.OBJLoader().load('./assets/tortoise.obj', tortoise => {
+    let texture = new THREE.TextureLoader().load('./assets/tortoise.jpg');
+    tortoise.traverse(function(child) {
+      if (child instanceof THREE.Mesh) {
+        child.material.map = texture;
+        child.castShadow = true;
+      }
+    });
+    tortoise.position.set(0, 3, 0);
+    tortoise.rotation.set(-Math.PI / 2, 0, -Math.PI / 2);
+
+    let obj = new THREE.Object3D();
+    obj.add(tortoise);
+    scene.add(obj);
+
+    let tortoiseAnimator = new KF.KeyFrameAnimator();
+    tortoiseAnimator.init({
+      interps: [
+        {
+          ...tortoisePath,
+          target: obj.position
+        },
+        {
+          ...tortoiseRotation,
+          target: obj.rotation
+        }
+      ],
+      loop: true,
+      duration: 40000
+    });
+    tortoiseAnimator.start();
+  });
 
   // set up path line
   let pathGeometry = new THREE.Geometry();
-  pathGeometry.vertices = path.values.map(el => {
-    return { x: el.x, y: 0, z: el.z };
-  });
+  pathGeometry.vertices = tortoisePath.values;
 
   let pathLine = new THREE.Line(
     pathGeometry,
@@ -103,14 +134,27 @@ async function setup(canvas) {
   return { renderer, scene, camera, controls };
 }
 
-function generatePath() {
+function generateBunnyPath() {
   let result = { keys: [], values: [] };
   for (let i = 0; i <= 1; i += 0.0001) {
     result.keys.push(i);
     result.values.push({
-      x: Math.sin(Math.PI * 2 * i) * 4,
-      y: Math.abs(Math.sin(Math.PI * 10 * i)),
-      z: Math.sin(Math.PI * 4 * i) * 2
+      x: Math.sin(Math.PI * 2 * i) * 64,
+      y: Math.abs(Math.sin(Math.PI * 10 * i)) * 16,
+      z: Math.sin(Math.PI * 4 * i) * 32
+    });
+  }
+  return result;
+}
+
+function generateTortoisePath() {
+  let result = { keys: [], values: [] };
+  for (let i = 0; i <= 1; i += 0.0001) {
+    result.keys.push(i);
+    result.values.push({
+      x: Math.sin(Math.PI * 2 * i) * 64,
+      y: 0,
+      z: Math.sin(Math.PI * 4 * i) * 32
     });
   }
   return result;
@@ -136,19 +180,6 @@ function generateRotation(path) {
       z: 0
     };
   });
-  return result;
-}
-
-function generateSpotlightPath() {
-  let result = { keys: [], values: [] };
-  for (let i = 0; i <= 1; i += 0.0001) {
-    result.keys.push(i);
-    result.values.push({
-      x: Math.sin(Math.PI * 2 * i) * 4,
-      y: 5,
-      z: Math.sin(Math.PI * 4 * i) * 2
-    });
-  }
   return result;
 }
 
